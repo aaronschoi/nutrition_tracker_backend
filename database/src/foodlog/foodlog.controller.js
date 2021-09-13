@@ -28,19 +28,20 @@ const errorCode = (code, msg) => {
 
 const addFood = async (req, res, next) => {
   const newFood = {...req.body.data};
-  const data = await service.create(newFood)
+  await service.create(newFood)
+  const data = await service.readByUser(newFood.user_id)
   res.json({data})
 }
 
 const readLogs = async (req, res, next) => {
   const { userid } = req.params;
-  const data = await service.read(userid)
+  const data = await service.readByUser(userid)
   res.json({data})
 }
 
 const idExists = async (req, res, next) => {
   const { food_log_id } = req.body.data;
-  const log = await service.read(food_log_id)
+  const log = await service.readByLog(food_log_id)
   if(log) {
     res.locals.log = log;
     return next();
@@ -57,9 +58,10 @@ const update = async (req, res, next) => {
 }
 
 const destroy = async (req, res, next) => {
-  const { food_log_id } = res.locals.log;
+  const { food_log_id, user_id } = res.locals.log;
   await service.destroy(food_log_id);
-  res.sendStatus(204)
+  const data = await service.readByUser(user_id)
+  res.json({data: "hello"})
 }
 
 module.exports = {

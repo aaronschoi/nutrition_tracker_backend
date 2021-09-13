@@ -70,6 +70,7 @@ const extractForSearch = (response) => {
 
 app.post("/singleid", async (req, res) => {
   const { fdcId, apiKey } = req.body.data;
+  console.log(fdcId, apiKey)
   const url = urlMaker(apiKey, "single", fdcId);
   const food = await axios.get(url).then(({ data }) => extractForID(data));
   res.json({ food });

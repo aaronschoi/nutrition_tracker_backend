@@ -6,9 +6,14 @@ const create = (newFood) => {
     .then(created => created[0]);
 }
 
-const read = (user_id) => {
+const readByUser = (user_id) => {
     return knex('food_log')
     .where({user_id})
+}
+
+const readByLog = (food_log_id) => {
+    return knex('food_log')
+    .where({food_log_id})
     .first()
 }
 
@@ -29,7 +34,8 @@ const destroy = food_log_id => {
 
 module.exports = {
     create,
-    read,
+    readByUser,
+    readByLog,
     update,
     destroy
 }
