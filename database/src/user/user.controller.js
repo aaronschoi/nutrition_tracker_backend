@@ -27,7 +27,7 @@ const errorCode = (code, msg) => {
   }
 };
 
-const authenticateToken = (req, res, next) => {
+const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
   if (token == null) return next(errorCode(401));
@@ -39,21 +39,28 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-const userExists = async (req, res, next) => {
-  const { username, password } = req.user;
-  const verifiedUser = await service.findUser(username, password);
-  if (verifiedUser) {
-    res.locals.user = verifiedUser;
+const usernameMatch = async (req, res, next) => {
+  const { username } = req.user;
+  const unMatches = await service.usernameMatch(username);
+  if(unMatches) {
+    res.locals.user = unMatches;
     return next();
-  } else {
-    return next(
-      errorCode(
-        404,
-        "The username and password combination did not match any of our records."
-      )
-    );
   }
-};
+  else {
+    return next(errorCode(404, "Username cannot be found in the database."))
+  }
+}
+
+const passwordMatch = async (req, res, next) => {
+  const { password } = req.user;
+  const pwMatches = password === res.locals.user.password;
+  if(pwMatches) {
+    return next();
+  }
+  else {
+    return next(errorCode(404, "wrong password"))
+  }
+}
 
 const getUser = async (req, res, next) => {
   const data = res.locals.user;
@@ -140,45 +147,47 @@ const createUser = async (req, res, next) => {
 const idExists = async (req, res, next) => {
   const { user_id } = req.body.data;
   const user = await service.findUserByID(user_id);
-  if(user) {
+  if (user) {
     res.locals.user = user;
     return next();
+  } else {
+    return next(errorCode(404, "User does not exist"));
   }
-  else {
-    return next(errorCode(404, "User does not exist"))
-  }
-}
+};
 
 const update = async (req, res, next) => {
-  const updatedUser = {...req.body.data};
+  const updatedUser = { ...req.body.data };
   const data = await service.update(updatedUser);
-  res.json({data})
-}
+  res.json({ data });
+};
 
 //DELETE USER VALIDATION
 const isAdmin = async (req, res, next) => {
-  const {admin} = req.body.data;
-  if(admin) {
-    return next()
+  const { admin } = req.body.data;
+  if (admin) {
+    return next();
+  } else {
+    return next(errorCode(401));
   }
-  else {
-    return next(errorCode(401))
-  }
-}
+};
 
 const destroy = async (req, res, next) => {
   const { user_id } = res.locals.user;
   await service.destroy(user_id);
   res.sendStatus(204);
-}
+};
 
 const list = async (req, res, next) => {
   const data = await service.list();
-  res.json({data})
+  res.json({ data });
+};
+
+const ez = async (req, res, next) => {
+  res.json({data: "hello"})
 }
 
 module.exports = {
-  getUser: [aeb(authenticateToken), aeb(userExists), aeb(getUser)],
+  getUser: [aeb(authenticateToken), aeb(usernameMatch), aeb(passwordMatch), aeb(getUser)],
   createUser: [
     aeb(hasUsername),
     aeb(hasPassword),
@@ -200,5 +209,6 @@ module.exports = {
     aeb(update),
   ],
   delete: [aeb(isAdmin), aeb(idExists), aeb(destroy)],
-  list: [aeb(isAdmin), aeb(list)]
+  list: [aeb(isAdmin), aeb(list)],
+  ez: [aeb(ez)]
 };

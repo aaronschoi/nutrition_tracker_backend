@@ -8,7 +8,7 @@ exports.up = function (knex) {
         table.date('dob').notNullable();
         table.string('sex').notNullable();
         table.string('usda').unique().notNullable();
-        table.string('avatar').defaultTo('https://i.pravatar.cc/150');
+        table.string('avatar').defaultTo('https://i.pravatar.cc/300');
         table.boolean('admin').defaultTo(false);
     })
 }

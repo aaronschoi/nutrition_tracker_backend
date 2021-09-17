@@ -7,12 +7,13 @@ router
 .get(controller.getUser)
 .post(controller.createUser)
 .put(controller.update)
-.delete(controller.delete)
 .all(methodNotAllowed)
 
 router
 .route('/admin')
-.get(controller.list)
+.get(controller.ez)
+.post(controller.list)
+.delete(controller.delete)
 .all(methodNotAllowed)
 
 module.exports = router;

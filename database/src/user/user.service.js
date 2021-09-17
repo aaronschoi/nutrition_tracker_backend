@@ -5,11 +5,10 @@ const list = () => {
     .select('*')
 }
 
-const findUser = (username, password) => {
+const usernameMatch = (username) => {
     return knex('user')
     .where({username})
-    .andWhere({password})
-    .first()
+    .first();
 }
 
 const findUserByID = (user_id) => {
@@ -41,9 +40,9 @@ const destroy = user_id => {
 
 module.exports = {
     list,
-    findUser,
     create,
     destroy,
     findUserByID,
-    update
+    update,
+    usernameMatch,
 }

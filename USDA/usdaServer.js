@@ -32,7 +32,7 @@ const urlMaker = (apiKey, urlType, searchTerm) => {
 };
 
 const extractForID = (response) => {
-  const { description, fdcId, brandName, ingredients, foodNutrients } =
+  const { description, fdcId, brandName, ingredients, foodNutrients, servingSize, servingSizeUnit } =
     response;
 
   const nutrients = foodNutrients.map((nutrient) => {
@@ -42,35 +42,39 @@ const extractForID = (response) => {
     };
   });
 
+  const serving = `${servingSize} ${servingSizeUnit}`
+
   return {
     description,
     fdcId,
     ingredients,
     nutrients,
     brandName: brandName ? brandName : "none",
+    serving
   };
 };
 
 const extractForSearch = (response) => {
-  const { description, fdcId, brandName, ingredients, foodNutrients } =
+  const { description, fdcId, brandName, ingredients, foodNutrients, servingSize, servingSizeUnit } =
     response;
   const nutrients = foodNutrients.map((nutrient) => {
     return {
       [nutrient.nutrientName]: `${nutrient.value} ${nutrient.unitName}`,
     };
   });
+  const serving = `${servingSize} ${servingSizeUnit}`
   return {
     description,
     fdcId,
     brandName: brandName ? brandName : "none",
     ingredients,
     nutrients,
+    serving
   };
 };
 
 app.post("/singleid", async (req, res) => {
   const { fdcId, apiKey } = req.body.data;
-  console.log(fdcId, apiKey)
   const url = urlMaker(apiKey, "single", fdcId);
   const food = await axios.get(url).then(({ data }) => extractForID(data));
   res.json({ food });
